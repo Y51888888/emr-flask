@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>病历详情</title>
+    <style>
+        body { font-family: "Microsoft YaHei", sans-serif; margin: 30px; background: #f7f8fa; }
+        .container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #333; margin-bottom: 30px; }
+        .btn { padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 4px; text-decoration: none; display: inline-block; margin-bottom: 20px; }
+        .btn:hover { background: #5a6268; }
+        .info-item { margin-bottom: 15px; line-height: 1.6; }
+        .label { font-weight: bold; color: #555; display: inline-block; width: 120px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="btn">返回列表</a>
+        <h1>中医电子病历详情</h1>
+
+        <div class="info-item"><span class="label">姓名：</span>{{ item.name }}</div>
+        <div class="info-item"><span class="label">性别：</span>{{ item.gender }}</div>
+        <div class="info-item"><span class="label">年龄：</span>{{ item.age }}</div>
+        <div class="info-item"><span class="label">电话：</span>{{ item.phone }}</div>
+        <div class="info-item"><span class="label">就诊时间：</span>{{ item.visit_time }}</div>
+
+        <div class="info-item"><span class="label">主诉：</span>{{ item.chief_complaint }}</div>
+        <div class="info-item"><span class="label">现病史：</span>{{ item.present_history }}</div>
+        <div class="info-item"><span class="label">既往史：</span>{{ item.past_history }}</div>
+        <div class="info-item"><span class="label">过敏史：</span>{{ item.allergy_history }}</div>
+        <div class="info-item"><span class="label">个人史：</span>{{ item.personal_history }}</div>
+        <div class="info-item"><span class="label">家族史：</span>{{ item.family_history }}</div>
+
+        <div class="info-item"><span class="label">体格检查：</span>{{ item.physical_exam }}</div>
+        <div class="info-item"><span class="label">中医诊断：</span>{{ item.tcm_diag }}</div>
+        <div class="info-item"><span class="label">证型：</span>{{ item.syndrome_type }}</div>
+        <div class="info-item"><span class="label">舌诊：</span>{{ item.tongue_diag }}</div>
+        <div class="info-item"><span class="label">脉诊：</span>{{ item.pulse_diag }}</div>
+
+        <div class="info-item"><span class="label">治法方药：</span>{{ item.therapy_prescription }}</div>
+        <div class="info-item"><span class="label">复诊记录：</span>{{ item.follow_up }}</div>
+        <div class="info-item"><span class="label">接诊医生：</span>{{ item.doctor_name }}</div>
+    </div>
+</body>
+</html>
