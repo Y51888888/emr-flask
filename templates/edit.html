@@ -4,54 +4,39 @@
     <meta charset="UTF-8">
     <title>编辑病历</title>
     <style>
-        body{max-width:1000px;margin:20px auto;padding:0 20px;}
-        .form-box{border:1px solid #999;padding:20px;border-radius:8px;}
-        .row{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:10px;}
-        .full{grid-column:1/-1;}
-        input,textarea,select{width:100%;padding:8px;box-sizing:border-box;border:1px solid #ccc;border-radius:4px;}
-        textarea{height:80px;resize:vertical;}
-        button{padding:10px 25px;background:#0066cc;color:white;border:none;border-radius:4px;}
-        .back{text-decoration:none;color:#0066cc;margin-left:20px;}
+        body { font-family: "Microsoft Yahei", sans-serif; margin: 20px; }
+        .btn { padding: 5px 10px; background: #007bff; color: white; text-decoration: none; border-radius: 3px; }
     </style>
 </head>
 <body>
-    <h2>编辑病历 <a href="/" class="back">返回列表</a></h2>
-    <div class="form-box">
-        <form method="post">
-            <div class="row">
-                <input type="text" name="name" value="{{info[1]}}" required>
-                <select name="gender">
-                    <option value="男" {%if info[2]=='男'%}selected{%endif%}>男</option>
-                    <option value="女" {%if info[2]=='女'%}selected{%endif%}>女</option>
-                </select>
-                <input type="number" name="age" value="{{info[3]}}">
-                <input type="text" name="phone" value="{{info[4]}}">
-                <input type="datetime-local" name="visit_time" value="{{info[5]}}" class="full">
-            </div>
-
-            <div class="row full"><textarea name="chief_complaint">{{info[6]}}</textarea></div>
-            <div class="row full"><textarea name="present_history">{{info[7]}}</textarea></div>
-            <div class="row full"><textarea name="past_history">{{info[8]}}</textarea></div>
-            <div class="row full"><textarea name="allergy_history">{{info[9]}}</textarea></div>
-            <div class="row full"><textarea name="personal_history">{{info[10]}}</textarea></div>
-            <div class="row full"><textarea name="family_history">{{info[11]}}</textarea></div>
-            <div class="row full"><textarea name="physical_exam">{{info[12]}}</textarea></div>
-
-            <div class="row">
-                <textarea name="tcm_diag">{{info[13]}}</textarea>
-                <textarea name="syndrome_type">{{info[14]}}</textarea>
-            </div>
-            <div class="row">
-                <textarea name="tongue_diag">{{info[15]}}</textarea>
-                <textarea name="pulse_diag">{{info[16]}}</textarea>
-            </div>
-
-            <div class="row full"><textarea name="therapy_prescription">{{info[17]}}</textarea></div>
-            <div class="row full"><textarea name="follow_up">{{info[18]}}</textarea></div>
-            <div class="row full"><input type="text" name="doctor_name" value="{{info[19]}}" required></div>
-
-            <button type="submit">保存修改</button>
-        </form>
-    </div>
+    <h1>编辑病历</h1>
+    <form method="POST">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px;">
+            <input type="text" name="name" placeholder="姓名" value="{{ info.name }}" required>
+            <select name="gender" required>
+                <option value="男" {% if info.gender == '男' %}selected{% endif %}>男</option>
+                <option value="女" {% if info.gender == '女' %}selected{% endif %}>女</option>
+            </select>
+            <input type="number" name="age" placeholder="年龄" value="{{ info.age }}" required>
+            <input type="text" name="phone" placeholder="电话" value="{{ info.phone }}" required>
+            <input type="datetime-local" name="visit_time" value="{{ info.visit_time }}" required>
+            <input type="text" name="chief_complaint" placeholder="主诉" value="{{ info.chief_complaint }}" required>
+        </div>
+        <textarea name="present_history" placeholder="现病史" rows="2" style="width:100%; margin-bottom:10px;">{{ info.present_history }}</textarea>
+        <textarea name="past_history" placeholder="既往史" rows="2" style="width:100%; margin-bottom:10px;">{{ info.past_history }}</textarea>
+        <textarea name="allergy_history" placeholder="过敏史" rows="2" style="width:100%; margin-bottom:10px;">{{ info.allergy_history }}</textarea>
+        <textarea name="personal_history" placeholder="个人史" rows="2" style="width:100%; margin-bottom:10px;">{{ info.personal_history }}</textarea>
+        <textarea name="family_history" placeholder="家族史" rows="2" style="width:100%; margin-bottom:10px;">{{ info.family_history }}</textarea>
+        <textarea name="physical_exam" placeholder="体格检查" rows="2" style="width:100%; margin-bottom:10px;">{{ info.physical_exam }}</textarea>
+        <textarea name="tcm_diag" placeholder="中医诊断" rows="2" style="width:100%; margin-bottom:10px;">{{ info.tcm_diag }}</textarea>
+        <textarea name="syndrome_type" placeholder="证型" rows="2" style="width:100%; margin-bottom:10px;">{{ info.syndrome_type }}</textarea>
+        <textarea name="tongue_diag" placeholder="舌诊" rows="2" style="width:100%; margin-bottom:10px;">{{ info.tongue_diag }}</textarea>
+        <textarea name="pulse_diag" placeholder="脉诊" rows="2" style="width:100%; margin-bottom:10px;">{{ info.pulse_diag }}</textarea>
+        <textarea name="therapy_prescription" placeholder="治法方药" rows="2" style="width:100%; margin-bottom:10px;">{{ info.therapy_prescription }}</textarea>
+        <textarea name="follow_up" placeholder="复诊记录" rows="2" style="width:100%; margin-bottom:10px;">{{ info.follow_up }}</textarea>
+        <input type="text" name="doctor_name" placeholder="接诊医生" value="{{ info.doctor_name }}" required style="width:100%; margin-bottom:10px;">
+        <button type="submit" class="btn">保存修改</button>
+        <a href="/" class="btn" style="background:#6c757d; margin-left:10px;">返回列表</a>
+    </form>
 </body>
 </html>
