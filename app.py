@@ -10,23 +10,33 @@ app = Flask(__name__)
 app.json.ensure_ascii = False
 app.secret_key = "emr_2026_secret_key_001"
 
-DATA_FILE = "emr_data.json"
+# 固定路径 + 确保一定能写入（Render 唯一能写的目录）
+DATA_FILE = "/tmp/emr_data.json"
 
+# 自动初始化文件
 if not os.path.exists(DATA_FILE):
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump([], f)
 
 def load_data():
-    with open(DATA_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
+    try:
+        with open(DATA_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except:
+        return []
 
 def save_data(data):
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+    try:
+        with open(DATA_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except:
+        pass
 
+# 登录信息
 LOGIN_USER = "admin"
 LOGIN_PWD = "123456"
 
+# PDF 导出
 def create_pdf(data):
     buf = io.BytesIO()
     c = canvas.Canvas(buf)
@@ -68,6 +78,7 @@ def create_pdf(data):
     buf.seek(0)
     return buf
 
+# 登录
 @app.route('/login', methods=["GET","POST"])
 def login():
     if request.method == "POST":
@@ -78,18 +89,22 @@ def login():
             return redirect(url_for("index"))
     return render_template("login.html")
 
+# 退出
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for("login"))
 
+# 主页 + 新增
 @app.route('/', methods=["GET","POST"])
 def index():
     if not session.get("login"):
         return redirect(url_for("login"))
+    
     data = load_data()
-    if request.method == "POST" and request.form.get("action")=="add":
-        new_id = max([x.get("id",0) for x in data], default=0)+1
+    
+    if request.method == "POST" and request.form.get("action") == "add":
+        new_id = max([x.get("id", 0) for x in data], default=0) + 1
         item = {
             "id": new_id,
             "name": request.form["name"],
@@ -115,27 +130,30 @@ def index():
         data.append(item)
         save_data(data)
         return redirect(url_for("index"))
-    key = request.args.get("key","")
+
+    key = request.args.get("key", "")
     if key:
         data = [x for x in data if key in x["name"] or key in x["phone"]]
-    data.sort(key=lambda x:x["id"], reverse=True)
+    data.sort(key=lambda x: x["id"], reverse=True)
     return render_template("index.html", emr_list=data, key=key)
 
+# 删除
 @app.route('/del/<int:uid>')
 def delete(uid):
     if not session.get("login"):
         return redirect(url_for("login"))
     data = load_data()
-    data = [x for x in data if x["id"]!=uid]
+    data = [x for x in data if x["id"] != uid]
     save_data(data)
     return redirect(url_for("index"))
 
+# PDF
 @app.route('/pdf/<int:uid>')
 def pdf(uid):
     if not session.get("login"):
         return redirect(url_for("login"))
     data = load_data()
-    item = next((x for x in data if x["id"]==uid), None)
+    item = next((x for x in data if x["id"] == uid), None)
     if not item:
         return redirect(url_for("index"))
     pdf_buf = create_pdf(item)
@@ -144,14 +162,16 @@ def pdf(uid):
     resp.headers["Content-Disposition"] = f"attachment; filename=病历_{item['name']}.pdf"
     return resp
 
+# 编辑
 @app.route('/edit/<int:uid>', methods=["GET","POST"])
 def edit(uid):
     if not session.get("login"):
         return redirect(url_for("login"))
     data = load_data()
-    idx = next((i for i,x in enumerate(data) if x["id"]==uid), None)
+    idx = next((i for i, x in enumerate(data) if x["id"] == uid), None)
     if idx is None:
         return redirect(url_for("index"))
+    
     if request.method == "POST":
         data[idx] = {
             "id": uid,
@@ -177,8 +197,10 @@ def edit(uid):
         }
         save_data(data)
         return redirect(url_for("index"))
+    
     return render_template("edit.html", info=data[idx])
 
+# Render 部署必须
 application = app
 
 if __name__ == "__main__":
