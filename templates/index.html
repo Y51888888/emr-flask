@@ -2,88 +2,82 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>中医电子病历系统</title>
+    <title>病历列表</title>
     <style>
-        body{max-width:1000px;margin:20px auto;padding:0 20px;}
-        .top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
-        .search-box input{padding:8px;width:250px;}
-        .search-box button{padding:8px 15px;background:#0066cc;color:white;border:none;}
-        .logout{color:red;text-decoration:none;}
-        .form-box{border:1px solid #999;padding:20px;border-radius:8px;margin-bottom:30px;}
-        .row{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:10px;}
-        .full{grid-column:1/-1;}
-        input,textarea,select{width:100%;padding:8px;box-sizing:border-box;border:1px solid #ccc;border-radius:4px;}
-        textarea{height:80px;resize:vertical;}
-        button{padding:10px 25px;background:#0066cc;color:white;border:none;border-radius:4px;cursor:pointer;}
-        .item{border:1px solid #ccc;padding:15px;margin:10px 0;border-radius:6px;}
-        .btn-del{background:#dc3545;}
-        .btn-pdf{background:#28a745;}
-        .btn-edit{background:#ff9800;}
+        body { font-family: "Microsoft Yahei", sans-serif; margin: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+        th { background: #f4f6f8; }
+        .btn { padding: 5px 10px; background: #007bff; color: white; text-decoration: none; border-radius: 3px; }
+        .btn.del { background: #dc3545; }
+        .btn.edit { background: #28a745; }
     </style>
 </head>
 <body>
-    <div class="top-bar">
-        <h2>中医电子病历系统</h2>
-        <a href="{{url_for('logout')}}" class="logout">退出登录</a>
+    <div class="header">
+        <h1>病历列表</h1>
+        <div>
+            <a href="/logout" class="btn" style="background:#6c757d;">退出登录</a>
+        </div>
     </div>
 
-    <div class="search-box">
-        <form action="/" method="get">
-            <input type="text" name="key" placeholder="输入姓名/电话搜索" value="{{key}}">
-            <button type="submit">搜索</button>
-            <a href="/"><button type="button">重置</button></a>
-        </form>
-    </div>
+    <form method="GET" style="margin-bottom: 20px;">
+        <input type="text" name="key" placeholder="按姓名/电话搜索" value="{{ key }}">
+        <button type="submit" class="btn">搜索</button>
+    </form>
 
-    <div class="form-box">
-        <form method="post">
-            <input type="hidden" name="action" value="add">
-            <div class="row">
-                <input type="text" name="name" placeholder="姓名" required>
-                <select name="gender">
-                    <option value="男">男</option>
-                    <option value="女">女</option>
-                </select>
-                <input type="number" name="age" placeholder="年龄" required>
-                <input type="text" name="phone" placeholder="联系电话">
-                <input type="datetime-local" name="visit_time" class="full">
-            </div>
+    <h3>新增病历</h3>
+    <form method="POST">
+        <input type="hidden" name="action" value="add">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px;">
+            <input type="text" name="name" placeholder="姓名" required>
+            <select name="gender" required>
+                <option value="男">男</option>
+                <option value="女">女</option>
+            </select>
+            <input type="number" name="age" placeholder="年龄" required>
+            <input type="text" name="phone" placeholder="电话" required>
+            <input type="datetime-local" name="visit_time" required>
+            <input type="text" name="chief_complaint" placeholder="主诉" required>
+        </div>
+        <textarea name="present_history" placeholder="现病史" rows="2" style="width:100%; margin-bottom:10px;"></textarea>
+        <textarea name="past_history" placeholder="既往史" rows="2" style="width:100%; margin-bottom:10px;"></textarea>
+        <textarea name="allergy_history" placeholder="过敏史" rows="2" style="width:100%; margin-bottom:10px;"></textarea>
+        <textarea name="personal_history" placeholder="个人史" rows="2" style="width:100%; margin-bottom:10px;"></textarea>
+        <textarea name="family_history" placeholder="家族史" rows="2" style="width:100%; margin-bottom:10px;"></textarea>
+        <textarea name="physical_exam" placeholder="体格检查" rows="2" style="width:100%; margin-bottom:10px;"></textarea>
+        <textarea name="tcm_diag" placeholder="中医诊断" rows="2" style="width:100%; margin-bottom:10px;"></textarea>
+        <textarea name="syndrome_type" placeholder="证型" rows="2" style="width:100%; margin-bottom:10px;"></textarea>
+        <textarea name="tongue_diag" placeholder="舌诊" rows="2" style="width:100%; margin-bottom:10px;"></textarea>
+        <textarea name="pulse_diag" placeholder="脉诊" rows="2" style="width:100%; margin-bottom:10px;"></textarea>
+        <textarea name="therapy_prescription" placeholder="治法方药" rows="2" style="width:100%; margin-bottom:10px;"></textarea>
+        <textarea name="follow_up" placeholder="复诊记录" rows="2" style="width:100%; margin-bottom:10px;"></textarea>
+        <input type="text" name="doctor_name" placeholder="接诊医生" required style="width:100%; margin-bottom:10px;">
+        <button type="submit" class="btn">提交</button>
+    </form>
 
-            <div class="row full"><textarea name="chief_complaint" placeholder="主诉"></textarea></div>
-            <div class="row full"><textarea name="present_history" placeholder="现病史"></textarea></div>
-            <div class="row full"><textarea name="past_history" placeholder="既往史"></textarea></div>
-            <div class="row full"><textarea name="allergy_history" placeholder="过敏史"></textarea></div>
-            <div class="row full"><textarea name="personal_history" placeholder="个人史"></textarea></div>
-            <div class="row full"><textarea name="family_history" placeholder="家族史"></textarea></div>
-            <div class="row full"><textarea name="physical_exam" placeholder="体格检查"></textarea></div>
-
-            <div class="row">
-                <textarea name="tcm_diag" placeholder="中医诊断"></textarea>
-                <textarea name="syndrome_type" placeholder="证型"></textarea>
-            </div>
-            <div class="row">
-                <textarea name="tongue_diag" placeholder="舌诊"></textarea>
-                <textarea name="pulse_diag" placeholder="脉诊"></textarea>
-            </div>
-
-            <div class="row full"><textarea name="therapy_prescription" placeholder="治法方药"></textarea></div>
-            <div class="row full"><textarea name="follow_up" placeholder="复诊记录"></textarea></div>
-            <div class="row full"><input type="text" name="doctor_name" placeholder="接诊医生" required></div>
-
-            <button type="submit">保存新增病历</button>
-        </form>
-    </div>
-
-    <h3>病历列表</h3>
-    {% for item in emr_list %}
-    <div class="item">
-        <p>编号：{{item[0]}} | 姓名：{{item[1]}} | 性别：{{item[2]}} | 年龄：{{item[3]}} | 电话：{{item[4]}} | 接诊医生：{{item[19]}}</p>
-        <a href="{{url_for('edit_emr',eid=item[0])}}"><button class="btn-edit">编辑</button></a>
-        <a href="{{url_for('export_pdf',eid=item[0])}}"><button class="btn-pdf">导出PDF</button></a>
-        <a href="{{url_for('delete_emr',eid=item[0])}}" onclick="return confirm('确定删除？')">
-            <button class="btn-del">删除</button>
-        </a>
-    </div>
-    {% endfor %}
+    <table>
+        <tr>
+            <th>姓名</th>
+            <th>性别</th>
+            <th>年龄</th>
+            <th>就诊时间</th>
+            <th>操作</th>
+        </tr>
+        {% for emr in emr_list %}
+        <tr>
+            <td>{{ emr.name }}</td>
+            <td>{{ emr.gender }}</td>
+            <td>{{ emr.age }}</td>
+            <td>{{ emr.visit_time }}</td>
+            <td>
+                <a href="/edit/{{ emr.id }}" class="btn edit">编辑</a>
+                <a href="/del/{{ emr.id }}" class="btn del" onclick="return confirm('确定删除吗？')">删除</a>
+                <a href="/pdf/{{ emr.id }}" class="btn">导出PDF</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
 </body>
 </html>
