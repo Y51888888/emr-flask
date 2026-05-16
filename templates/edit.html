@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>编辑病历</title>
+    <style>
+        body{max-width:1000px;margin:20px auto;padding:0 20px;}
+        .form-box{border:1px solid #999;padding:20px;border-radius:8px;}
+        .row{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:10px;}
+        .full{grid-column:1/-1;}
+        input,textarea,select{width:100%;padding:8px;box-sizing:border-box;border:1px solid #ccc;border-radius:4px;}
+        textarea{height:80px;resize:vertical;}
+        button{padding:10px 25px;background:#0066cc;color:white;border:none;border-radius:4px;}
+        .back{text-decoration:none;color:#0066cc;margin-left:20px;}
+    </style>
+</head>
+<body>
+    <h2>编辑病历 <a href="/" class="back">返回列表</a></h2>
+    <div class="form-box">
+        <form method="post">
+            <div class="row">
+                <input type="text" name="name" value="{{info[1]}}" required>
+                <select name="gender">
+                    <option value="男" {%if info[2]=='男'%}selected{%endif%}>男</option>
+                    <option value="女" {%if info[2]=='女'%}selected{%endif%}>女</option>
+                </select>
+                <input type="number" name="age" value="{{info[3]}}">
+                <input type="text" name="phone" value="{{info[4]}}">
+                <input type="datetime-local" name="visit_time" value="{{info[5]}}" class="full">
+            </div>
+
+            <div class="row full"><textarea name="chief_complaint">{{info[6]}}</textarea></div>
+            <div class="row full"><textarea name="present_history">{{info[7]}}</textarea></div>
+            <div class="row full"><textarea name="past_history">{{info[8]}}</textarea></div>
+            <div class="row full"><textarea name="allergy_history">{{info[9]}}</textarea></div>
+            <div class="row full"><textarea name="personal_history">{{info[10]}}</textarea></div>
+            <div class="row full"><textarea name="family_history">{{info[11]}}</textarea></div>
+            <div class="row full"><textarea name="physical_exam">{{info[12]}}</textarea></div>
+
+            <div class="row">
+                <textarea name="tcm_diag">{{info[13]}}</textarea>
+                <textarea name="syndrome_type">{{info[14]}}</textarea>
+            </div>
+            <div class="row">
+                <textarea name="tongue_diag">{{info[15]}}</textarea>
+                <textarea name="pulse_diag">{{info[16]}}</textarea>
+            </div>
+
+            <div class="row full"><textarea name="therapy_prescription">{{info[17]}}</textarea></div>
+            <div class="row full"><textarea name="follow_up">{{info[18]}}</textarea></div>
+            <div class="row full"><input type="text" name="doctor_name" value="{{info[19]}}" required></div>
+
+            <button type="submit">保存修改</button>
+        </form>
+    </div>
+</body>
+</html>
