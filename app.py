@@ -5,10 +5,10 @@ import os
 app = Flask(__name__)
 app.secret_key = "emr_2026_final_key"
 
-# Render 专用持久化数据库路径
+# Render 上唯一稳定的持久化路径
 DB_PATH = "/tmp/emr_database.db"
 
-# 初始化数据库
+# 初始化数据库和表（程序启动时自动执行）
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
