@@ -1,8 +1,30 @@
 from flask import Flask, render_template, request, redirect, url_for, session
+import json
+import os
 
 app = Flask(__name__)
 app.secret_key = "emr_2026_final_key"
+
+# 病历数据文件
+DATA_FILE = "emr_data.json"
 emr_data = []
+
+# 程序启动时：读取本地保存的病历文件
+def load_data():
+    global emr_data
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, "r", encoding="utf-8") as f:
+            emr_data = json.load(f)
+    else:
+        emr_data = []
+
+# 保存病历到本地文件
+def save_data():
+    with open(DATA_FILE, "w", encoding="utf-8") as f:
+        json.dump(emr_data, f, ensure_ascii=False, indent=2)
+
+# 启动先加载数据
+load_data()
 
 # 登录账号
 USER = "admin"
@@ -51,6 +73,7 @@ def index():
             "doctor_name": request.form['doctor_name']
         }
         emr_data.append(item)
+        save_data()   # 新增：添加后自动保存到文件
         return redirect('/')
 
     key = request.args.get('key','')
@@ -64,6 +87,7 @@ def delete(uid):
         return redirect('/login')
     global emr_data
     emr_data = [x for x in emr_data if x['id'] != uid]
+    save_data()   # 新增：删除后自动保存
     return redirect('/')
 
 @app.route('/edit/<int:uid>', methods=['GET','POST'])
@@ -96,10 +120,11 @@ def edit(uid):
             "follow_up": request.form['follow_up'],
             "doctor_name": request.form['doctor_name']
         }
+        save_data()   # 新增：修改后自动保存
         return redirect('/')
     return render_template('edit.html', info=emr_data[idx])
 
-# 新增：查看病历页面（替代导出功能）
+# 查看病历页面
 @app.route('/view/<int:uid>')
 def view(uid):
     if not session.get('login'):
