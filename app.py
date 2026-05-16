@@ -1,49 +1,13 @@
-from flask import Flask, render_template, request, redirect, url_for, make_response, session
-import io
+from flask import Flask, render_template, request, redirect, url_for, session
 
 app = Flask(__name__)
-app.secret_key = "emr_123456"
+app.secret_key = "emr_2026_final_key"
 emr_data = []
 
 # 登录账号
 USER = "admin"
 PWD = "123456"
 
-# ----------------------
-# PDF 导出（纯文本，100%成功）
-# ----------------------
-def export_txt(data):
-    content = f"""
-中医电子病历
-
-姓名：{data['name']}
-性别：{data['gender']}
-年龄：{data['age']}
-电话：{data['phone']}
-就诊时间：{data['visit_time']}
-
-主诉：{data['chief_complaint']}
-现病史：{data['present_history']}
-既往史：{data['past_history']}
-过敏史：{data['allergy_history']}
-个人史：{data['personal_history']}
-家族史：{data['family_history']}
-
-体格检查：{data['physical_exam']}
-中医诊断：{data['tcm_diag']}
-证型：{data['syndrome_type']}
-舌诊：{data['tongue_diag']}
-脉诊：{data['pulse_diag']}
-
-治法方药：{data['therapy_prescription']}
-复诊记录：{data['follow_up']}
-接诊医生：{data['doctor_name']}
-    """
-    return content.strip()
-
-# ----------------------
-# 路由
-# ----------------------
 @app.route('/login', methods=['GET','POST'])
 def login():
     if request.method == 'POST':
@@ -135,22 +99,15 @@ def edit(uid):
         return redirect('/')
     return render_template('edit.html', info=emr_data[idx])
 
-# ----------------------
-# 导出文件（100%成功）
-# ----------------------
-@app.route('/export/<int:uid>')
-def export(uid):
+# 新增：查看病历页面（替代导出功能）
+@app.route('/view/<int:uid>')
+def view(uid):
     if not session.get('login'):
         return redirect('/login')
     item = next((x for x in emr_data if x['id'] == uid), None)
     if not item:
         return redirect('/')
-    
-    txt = export_txt(item)
-    response = make_response(txt)
-    response.headers["Content-Type"] = "text/plain; charset=utf-8"
-    response.headers["Content-Disposition"] = f"attachment; filename=病历_{item['name']}.txt"
-    return response
+    return render_template('view.html', item=item)
 
 application = app
 
