@@ -1,42 +1,29 @@
 from flask import Flask, render_template, request, redirect, url_for, session
-from flask_sqlalchemy import SQLAlchemy
+import sqlite3
 import os
 
 app = Flask(__name__)
 app.secret_key = "emr_2026_final_key"
 
-# 关键：Render 持久化数据库路径（不会被清空）
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/emr_database.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# Render 专用持久化数据库路径
+DB_PATH = "/tmp/emr_database.db"
 
-db = SQLAlchemy(app)
+# 初始化数据库
+def init_db():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS emr_records
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  name TEXT, gender TEXT, age TEXT, phone TEXT,
+                  visit_time TEXT, chief_complaint TEXT, present_history TEXT,
+                  past_history TEXT, allergy_history TEXT, personal_history TEXT,
+                  family_history TEXT, physical_exam TEXT, tcm_diag TEXT,
+                  syndrome_type TEXT, tongue_diag TEXT, pulse_diag TEXT,
+                  therapy_prescription TEXT, follow_up TEXT, doctor_name TEXT)''')
+    conn.commit()
+    conn.close()
 
-# 病历数据表模型
-class EmrRecord(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50))
-    gender = db.Column(db.String(10))
-    age = db.Column(db.String(10))
-    phone = db.Column(db.String(20))
-    visit_time = db.Column(db.String(30))
-    chief_complaint = db.Column(db.Text)
-    present_history = db.Column(db.Text)
-    past_history = db.Column(db.Text)
-    allergy_history = db.Column(db.Text)
-    personal_history = db.Column(db.Text)
-    family_history = db.Column(db.Text)
-    physical_exam = db.Column(db.Text)
-    tcm_diag = db.Column(db.Text)
-    syndrome_type = db.Column(db.Text)
-    tongue_diag = db.Column(db.Text)
-    pulse_diag = db.Column(db.Text)
-    therapy_prescription = db.Column(db.Text)
-    follow_up = db.Column(db.Text)
-    doctor_name = db.Column(db.String(30))
-
-# 初始化数据表
-with app.app_context():
-    db.create_all()
+init_db()
 
 # 登录账号
 USER = "admin"
@@ -61,38 +48,38 @@ def index():
         return redirect('/login')
 
     if request.method == 'POST' and request.form.get('action') == 'add':
-        new_record = EmrRecord(
-            name=request.form['name'],
-            gender=request.form['gender'],
-            age=request.form['age'],
-            phone=request.form['phone'],
-            visit_time=request.form['visit_time'],
-            chief_complaint=request.form['chief_complaint'],
-            present_history=request.form['present_history'],
-            past_history=request.form['past_history'],
-            allergy_history=request.form['allergy_history'],
-            personal_history=request.form['personal_history'],
-            family_history=request.form['family_history'],
-            physical_exam=request.form['physical_exam'],
-            tcm_diag=request.form['tcm_diag'],
-            syndrome_type=request.form['syndrome_type'],
-            tongue_diag=request.form['tongue_diag'],
-            pulse_diag=request.form['pulse_diag'],
-            therapy_prescription=request.form['therapy_prescription'],
-            follow_up=request.form['follow_up'],
-            doctor_name=request.form['doctor_name']
-        )
-        db.session.add(new_record)
-        db.session.commit()
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute('''INSERT INTO emr_records 
+                     (name, gender, age, phone, visit_time, chief_complaint, present_history,
+                      past_history, allergy_history, personal_history, family_history,
+                      physical_exam, tcm_diag, syndrome_type, tongue_diag, pulse_diag,
+                      therapy_prescription, follow_up, doctor_name)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                  (request.form['name'], request.form['gender'], request.form['age'],
+                   request.form['phone'], request.form['visit_time'], request.form['chief_complaint'],
+                   request.form['present_history'], request.form['past_history'],
+                   request.form['allergy_history'], request.form['personal_history'],
+                   request.form['family_history'], request.form['physical_exam'],
+                   request.form['tcm_diag'], request.form['syndrome_type'],
+                   request.form['tongue_diag'], request.form['pulse_diag'],
+                   request.form['therapy_prescription'], request.form['follow_up'],
+                   request.form['doctor_name']))
+        conn.commit()
+        conn.close()
         return redirect('/')
 
     key = request.args.get('key','')
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
     if key:
-        emr_list = EmrRecord.query.filter(
-            EmrRecord.name.contains(key) | EmrRecord.phone.contains(key)
-        ).order_by(EmrRecord.id.desc()).all()
+        c.execute("SELECT * FROM emr_records WHERE name LIKE ? OR phone LIKE ? ORDER BY id DESC",
+                  ('%' + key + '%', '%' + key + '%'))
     else:
-        emr_list = EmrRecord.query.order_by(EmrRecord.id.desc()).all()
+        c.execute("SELECT * FROM emr_records ORDER BY id DESC")
+    emr_list = [dict(row) for row in c.fetchall()]
+    conn.close()
 
     return render_template('index.html', emr_list=emr_list, key=key)
 
@@ -100,45 +87,54 @@ def index():
 def delete(uid):
     if not session.get('login'):
         return redirect('/login')
-    record = EmrRecord.query.get_or_404(uid)
-    db.session.delete(record)
-    db.session.commit()
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("DELETE FROM emr_records WHERE id=?", (uid,))
+    conn.commit()
+    conn.close()
     return redirect('/')
 
 @app.route('/edit/<int:uid>', methods=['GET','POST'])
 def edit(uid):
     if not session.get('login'):
         return redirect('/login')
-    record = EmrRecord.query.get_or_404(uid)
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
     if request.method == 'POST':
-        record.name = request.form['name']
-        record.gender = request.form['gender']
-        record.age = request.form['age']
-        record.phone = request.form['phone']
-        record.visit_time = request.form['visit_time']
-        record.chief_complaint = request.form['chief_complaint']
-        record.present_history = request.form['present_history']
-        record.past_history = request.form['past_history']
-        record.allergy_history = request.form['allergy_history']
-        record.personal_history = request.form['personal_history']
-        record.family_history = request.form['family_history']
-        record.physical_exam = request.form['physical_exam']
-        record.tcm_diag = request.form['tcm_diag']
-        record.syndrome_type = request.form['syndrome_type']
-        record.tongue_diag = request.form['tongue_diag']
-        record.pulse_diag = request.form['pulse_diag']
-        record.therapy_prescription = request.form['therapy_prescription']
-        record.follow_up = request.form['follow_up']
-        record.doctor_name = request.form['doctor_name']
-        db.session.commit()
+        c.execute('''UPDATE emr_records SET 
+                     name=?, gender=?, age=?, phone=?, visit_time=?, chief_complaint=?,
+                     present_history=?, past_history=?, allergy_history=?, personal_history=?,
+                     family_history=?, physical_exam=?, tcm_diag=?, syndrome_type=?,
+                     tongue_diag=?, pulse_diag=?, therapy_prescription=?, follow_up=?, doctor_name=?
+                     WHERE id=?''',
+                  (request.form['name'], request.form['gender'], request.form['age'],
+                   request.form['phone'], request.form['visit_time'], request.form['chief_complaint'],
+                   request.form['present_history'], request.form['past_history'],
+                   request.form['allergy_history'], request.form['personal_history'],
+                   request.form['family_history'], request.form['physical_exam'],
+                   request.form['tcm_diag'], request.form['syndrome_type'],
+                   request.form['tongue_diag'], request.form['pulse_diag'],
+                   request.form['therapy_prescription'], request.form['follow_up'],
+                   request.form['doctor_name'], uid))
+        conn.commit()
+        conn.close()
         return redirect('/')
-    return render_template('edit.html', info=record)
+    c.execute("SELECT * FROM emr_records WHERE id=?", (uid,))
+    info = dict(c.fetchone())
+    conn.close()
+    return render_template('edit.html', info=info)
 
 @app.route('/view/<int:uid>')
 def view(uid):
     if not session.get('login'):
         return redirect('/login')
-    item = EmrRecord.query.get_or_404(uid)
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("SELECT * FROM emr_records WHERE id=?", (uid,))
+    item = dict(c.fetchone())
+    conn.close()
     return render_template('view.html', item=item)
 
 application = app
